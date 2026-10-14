@@ -29,6 +29,12 @@ jobs:
       - name: Install JavaScript dependencies
         run: npm ci
 
+      - name: Run JavaScript regression tests
+        run: npm test
+
+      - name: Run Rust regression tests
+        run: cargo test --locked --manifest-path src-tauri/Cargo.toml --target x86_64-pc-windows-msvc
+
       - name: Build and publish GitHub Release
         uses: tauri-apps/tauri-action@v1
         env:

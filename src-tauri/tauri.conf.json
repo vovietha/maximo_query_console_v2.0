@@ -1,13 +1,13 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Maximo SQL Query Console",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "identifier": "com.maximo.sqlconsole",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://127.0.0.1:1420",
     "beforeBuildCommand": "npm run build",
-    "frontendDist": "../public"
+    "frontendDist": "../dist"
   },
   "app": {
     "withGlobalTauri": true,

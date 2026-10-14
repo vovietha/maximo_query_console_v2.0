@@ -5,21 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MAXIMO SQL QUERY CONSOLE</title>
     
-    <!-- CodeMirror CSS & Theme -->
-    <link rel="stylesheet" href="./vendor/codemirror/lib/codemirror.css">
-    <link rel="stylesheet" href="./vendor/codemirror/theme/dracula.css">
-    <link rel="stylesheet" href="./vendor/codemirror/theme/eclipse.css">
-    <link rel="stylesheet" href="./vendor/codemirror/addon/hint/show-hint.css">
     <!-- Stylesheet -->
     <link rel="stylesheet" href="style.css">
-    
-
-    <!-- External Libraries -->
-    <script src="./vendor/codemirror/lib/codemirror.js"></script>
-    <script src="./vendor/codemirror/mode/sql/sql.js"></script>
-    <script src="./vendor/codemirror/addon/hint/show-hint.js"></script>
-    <script src="./vendor/codemirror/addon/hint/sql-hint.js"></script>
-    <script src="./vendor/codemirror/addon/comment/comment.js"></script>
 </head>
 <body>
 
@@ -133,11 +120,11 @@
                     
                     <div class="results-actions">
                         <button class="btn btn-toggle" id="btn-toggle-view" data-action="toggleView" title="Đổi giao diện Bảng/JSON">👁️ View</button>
-                        <button class="btn btn-excel" id="btn-export" data-action="exportExcel" title="Xuất tập tin Excel">📥 Excel</button>
+                        <button class="btn btn-excel" id="btn-export" data-action="exportExcel" title="Xuất dữ liệu trang hiện tại (tối đa 50 dòng)">📥 Excel</button>
                         
                         <div class="toolbar-divider"></div>
                         
-                        <input type="text" id="filterInput" class="filter-input" data-input-action="renderResults" placeholder="🔍 Lọc kết quả..." />
+                        <input type="text" id="filterInput" class="filter-input" data-input-action="renderResults" placeholder="🔍 Lọc trong trang hiện tại..." />
                         
                         <div class="pagination-widget">
                             <button class="pg-btn" id="btnPrev" data-action="changePage" data-delta="-1" disabled title="Trang trước">‹</button>
@@ -223,7 +210,6 @@
             <button class="btn btn-run" style="width: 100%; margin-top: 10px;" data-action="saveConfig">Lưu cấu hình</button>
         </div>
     </div>
-
-    <script src="app.js"></script>
+    <script type="module" src="./app.js"></script>
 </body>
 </html>

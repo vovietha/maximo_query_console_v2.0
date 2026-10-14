@@ -1,13 +1,14 @@
 {
   "name": "maximo-query-tauri",
   "private": true,
-  "version": "2.0.3",
+  "version": "2.0.4",
   "type": "module",
   "scripts": {
     "assets": "node scripts/copy-vendor-assets.mjs",
     "dev": "npm run assets && vite --host 127.0.0.1",
-    "build": "npm run assets",
+    "build": "npm run assets && vite build && node scripts/copy-runtime-assets.mjs",
     "build:app": "npm run tauri -- build",
+    "test": "node --test",
     "tauri": "node scripts/run-tauri.cjs",
     "publish": "node scripts/publish.cjs",
     "release": "node scripts/release.cjs"

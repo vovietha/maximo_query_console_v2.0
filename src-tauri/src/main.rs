@@ -135,6 +135,97 @@ fn endpoint(config: &ConnectionConfig) -> Result<String, String> {
     Ok(format!("{host}/{context}/oslc/script/EXEC_SQL"))
 }
 
+/// Best-effort statement guard for Safe Mode. Maximo/database permissions remain
+/// the authoritative protection against functions with side effects.
+fn first_sql_keyword(sql: &str) -> Option<String> {
+    let bytes = sql.as_bytes();
+    let mut index = 0;
+    loop {
+        while index < bytes.len() && bytes[index].is_ascii_whitespace() { index += 1; }
+        if bytes.get(index..index + 2) == Some(b"--") {
+            index += 2;
+            while index < bytes.len() && bytes[index] != b'\n' { index += 1; }
+        } else if bytes.get(index..index + 2) == Some(b"/*") {
+            let rest = &sql[index + 2..];
+            let end = rest.find("*/")?;
+            index += end + 4;
+        } else {
+            break;
+        }
+    }
+    let start = index;
+    while index < bytes.len() && (bytes[index].is_ascii_alphabetic() || bytes[index] == b'_') { index += 1; }
+    (index > start).then(|| sql[start..index].to_ascii_uppercase())
+}
+
+fn is_read_only_query(sql: &str) -> bool {
+    let bytes = sql.as_bytes();
+    let mut tokens = Vec::new();
+    let mut index = 0;
+
+    while index < bytes.len() {
+        match bytes[index] {
+            b' ' | b'\t' | b'\r' | b'\n' => index += 1,
+            b';' => return false,
+            b'-' if bytes.get(index + 1) == Some(&b'-') => {
+                index += 2;
+                while index < bytes.len() && bytes[index] != b'\n' { index += 1; }
+            }
+            b'/' if bytes.get(index + 1) == Some(&b'*') => {
+                index += 2;
+                let mut closed = false;
+                while index + 1 < bytes.len() {
+                    if bytes[index] == b'*' && bytes[index + 1] == b'/' {
+                        index += 2;
+                        closed = true;
+                        break;
+                    }
+                    index += 1;
+                }
+                if !closed { return false; }
+            }
+            quote @ (b'\'' | b'"') => {
+                index += 1;
+                let mut closed = false;
+                while index < bytes.len() {
+                    if bytes[index] == quote {
+                        if bytes.get(index + 1) == Some(&quote) {
+                            index += 2;
+                        } else {
+                            index += 1;
+                            closed = true;
+                            break;
+                        }
+                    } else {
+                        index += 1;
+                    }
+                }
+                if !closed { return false; }
+                // Quoted strings and identifiers do not contribute SQL keywords.
+                tokens.push(String::new());
+            }
+            byte if byte.is_ascii_alphabetic() || byte == b'_' => {
+                let start = index;
+                index += 1;
+                while index < bytes.len() && (bytes[index].is_ascii_alphanumeric() || bytes[index] == b'_' || bytes[index] == b'$' || bytes[index] == b'#') {
+                    index += 1;
+                }
+                tokens.push(sql[start..index].to_ascii_uppercase());
+            }
+            _ => index += 1,
+        }
+    }
+
+    let Some(first) = first_sql_keyword(sql) else { return false; };
+    if first != "SELECT" && first != "WITH" { return false; }
+    let forbidden = [
+        "INSERT", "UPDATE", "DELETE", "MERGE", "CREATE", "ALTER", "DROP",
+        "TRUNCATE", "GRANT", "REVOKE", "CALL", "EXEC", "EXECUTE", "COMMIT",
+        "ROLLBACK", "SAVEPOINT", "BEGIN",
+    ];
+    !tokens.iter().any(|token| forbidden.contains(&token.as_str()))
+}
+
 async fn post_sql(config: &ConnectionConfig, sql: &str) -> Result<Value, String> {
     let url = endpoint(config)?;
     let password = load_password()?;
@@ -186,17 +277,17 @@ async fn execute_sql(
     if clean.is_empty() {
         return Err("Câu lệnh SQL không được để trống.".into());
     }
-    let upper = clean.to_ascii_uppercase();
-    let is_select = upper.starts_with("SELECT") || upper.starts_with("WITH");
-    if safe_mode.unwrap_or(false)
-        && !is_select
-        && upper != "COMMIT"
-        && upper != "ROLLBACK"
-    {
+    if clean.contains(';') {
+        return Err("Chỉ hỗ trợ một câu lệnh SQL mỗi lần thực thi.".into());
+    }
+    let first_keyword = first_sql_keyword(clean);
+    let is_select = matches!(first_keyword.as_deref(), Some("SELECT" | "WITH"));
+    if safe_mode.unwrap_or(false) && !is_read_only_query(clean) {
         return Err("Chế độ Safe Mode đang bật. Không thể thực thi câu lệnh thay đổi dữ liệu.".into());
     }
 
-    let page_size = 50usize;
+    const PAGE_SIZE: usize = 50;
+    let page_size = PAGE_SIZE;
     let current_page = page.unwrap_or(1).max(1);
     let statement = if is_select {
         let start = (current_page as usize - 1) * page_size + 1;
@@ -229,6 +320,35 @@ async fn execute_sql(
             action: "EXECUTE".into(), page: None, page_size: None, has_more: None,
             data: None, message: result["message"].as_str().map(str::to_owned),
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::is_read_only_query;
+
+    #[test]
+    fn accepts_select_with_comments_and_quoted_keywords() {
+        assert!(is_read_only_query("-- read only\nSELECT 'delete', \"UPDATE\" FROM workorder"));
+    }
+
+    #[test]
+    fn accepts_read_only_cte() {
+        assert!(is_read_only_query("WITH recent AS (SELECT wonum FROM workorder) SELECT * FROM recent"));
+    }
+
+    #[test]
+    fn rejects_mutations_and_mutating_ctes() {
+        for sql in ["UPDATE workorder SET status='X'", "WITH x AS (DELETE FROM workorder) SELECT * FROM x", "DROP TABLE workorder"] {
+            assert!(!is_read_only_query(sql), "accepted: {sql}");
+        }
+    }
+
+    #[test]
+    fn rejects_multiple_statements_and_unclosed_literals() {
+        assert!(!is_read_only_query("SELECT 1; DELETE FROM workorder"));
+        assert!(!is_read_only_query("SELECT 'unfinished"));
+        assert!(!is_read_only_query("SELECT 1 /* unfinished"));
     }
 }
 
