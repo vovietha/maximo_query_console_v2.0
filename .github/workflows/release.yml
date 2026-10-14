@@ -37,7 +37,7 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           projectPath: .
-          tauriScript: npm run tauri --
+          tauriScript: npm run tauri
           args: --target x86_64-pc-windows-msvc
           tagName: ${{ github.ref_name }}
           releaseName: Maximo SQL Query Console ${{ github.ref_name }}
