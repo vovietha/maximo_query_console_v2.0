@@ -1,0 +1,23 @@
+{
+  "name": "maximo-query-tauri",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "scripts": {
+    "assets": "node scripts/copy-vendor-assets.mjs",
+    "dev": "npm run assets && vite --host 127.0.0.1",
+    "build": "npm run assets",
+    "build:app": "npm run tauri -- build",
+    "tauri": "node scripts/run-tauri.cjs",
+    "publish": "node scripts/publish.cjs",
+    "release": "node scripts/release.cjs"
+  },
+  "dependencies": {
+    "codemirror": "5.65.20",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.8.4",
+    "vite": "^6.4.1"
+  }
+}

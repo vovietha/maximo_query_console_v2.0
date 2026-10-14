@@ -1,0 +1,686 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { 
+    background-color: #1e1e1e; 
+    color: #d4d4d4; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    padding: 8px; 
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Top Navigation Header */
+.navbar { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    background-color: #181818; 
+    padding: 6px 14px; 
+    border-bottom: 1px solid #333; 
+    border-radius: 6px; 
+    margin-bottom: 8px; 
+}
+.nav-brand { display: flex; align-items: center; gap: 8px; }
+.navbar h1 { color: #61dafb; margin: 0; font-size: 16px; font-weight: bold; }
+.nav-version { background: #0e639c; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: bold; }
+.btn-config { background: #333; color: #fff; border: 1px solid #555; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+.btn-config:hover { background: #444; }
+
+/* Main Console Layout */
+.container { 
+    display: flex; 
+    flex: 1;
+    height: calc(100vh - 78px); 
+    gap: 8px; 
+    overflow: hidden;
+}
+.main-panel { flex: 1; display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
+
+/* Sidebar Collapsible Layout */
+.sidebar { 
+    width: 300px; 
+    height: 100%;
+    background: #252526; 
+    border-radius: 6px; 
+    padding: 8px; 
+    display: flex; 
+    flex-direction: column; 
+    border: 1px solid #3c3c3c; 
+    overflow: hidden;
+    transition: width 0.2s ease-in-out;
+}
+/* Khi Sidebar THU GỌN (Collapsed State) */
+.sidebar.collapsed {
+    width: 48px !important;
+    padding: 8px 4px;
+}
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    margin-bottom: 8px;
+    flex-shrink: 0;
+}
+.sidebar.collapsed .tab-label,
+.sidebar.collapsed .sidebar-panel {
+    display: none !important;
+}
+
+/* Đổi bố cục Header sang dạng cột đứng */
+.sidebar.collapsed .sidebar-header {
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+}
+
+/* Xoay các nút Tab thành danh sách icon dọc */
+.sidebar.collapsed .sidebar-tabs {
+    flex-direction: column;
+    width: 100%;
+}
+
+.sidebar.collapsed .sb-tab {
+    padding: 6px 0;
+    text-align: center;
+    font-size: 14px;
+    width: 100%;
+}
+
+/* Ẩn chữ nhãn, giữ lại icon */
+.sidebar.collapsed .tab-label,
+.sidebar.collapsed .sidebar-panel,
+.sidebar.collapsed .schema-filter {
+    display: none !important;
+}
+.btn-toggle-sidebar {
+    background: #1e1e1e;
+    color: #61dafb;
+    border: 1px solid #3c3c3c;
+    border-radius: 4px;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.btn-toggle-sidebar:hover { background: #333; }
+
+/* Nút Toggle mở rộng luôn hiển thị rõ ràng */
+.sidebar.collapsed .btn-toggle-sidebar {
+    width: 100%;
+    height: 28px;
+    background: #0e639c;
+    color: #fff;
+    border-color: #1177bb;
+}
+
+/* Resizable Editor Container */
+.editor-container { 
+    height: 200px; 
+    min-height: 90px; 
+    max-height: 60vh; 
+    resize: vertical; 
+    overflow: hidden; 
+    border: 1px solid #3c3c3c; 
+    border-radius: 0 0 4px 4px; 
+    position: relative; 
+}
+.CodeMirror { height: 100% !important; font-size: 13px; font-family: 'Consolas', 'Courier New', monospace; }
+
+/* SQL Execution Toolbar */
+.toolbar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #181818;
+    padding: 4px 8px;
+    border: 1px solid #3c3c3c;
+    border-radius: 4px;
+}
+.toolbar-group { display: flex; align-items: center; gap: 4px; }
+.toolbar-divider { width: 1px; height: 18px; background-color: #3c3c3c; margin: 0 4px; }
+
+/* Buttons */
+.btn {
+    padding: 4px 10px;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 12px;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 26px;
+}
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-run { background-color: #0e639c; color: white; }
+.btn-run:hover:not(:disabled) { background-color: #1177bb; }
+.btn-commit { background-color: #00796b; color: white; }
+.btn-commit:hover:not(:disabled) { background-color: #004d40; }
+.btn-rollback { background-color: #c62828; color: white; }
+.btn-rollback:hover:not(:disabled) { background-color: #b71c1c; }
+.btn-format { background-color: #6a1b9a; color: white; }
+.btn-fav { background-color: #f57f17; color: white; }
+.btn-toggle { background-color: #d7ba7d; color: #1e1e1e; }
+.btn-excel { background-color: #278040; color: white; }
+.btn-nav { background: #333; color: #61dafb; border: 1px solid #444; height: 24px; padding: 2px 6px; }
+
+/* Safe Mode & Limit Switches */
+.safe-mode-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #252526;
+    padding: 2px 8px;
+    border: 1px solid #3c3c3c;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    height: 26px;
+    user-select: none;
+}
+.safe-mode-toggle input { display: none; }
+.safe-mode-toggle .slider { width: 24px; height: 12px; background-color: #555; border-radius: 10px; position: relative; transition: 0.3s; }
+.safe-mode-toggle .slider::before { content: ""; position: absolute; width: 8px; height: 8px; border-radius: 50%; background-color: white; top: 2px; left: 2px; transition: 0.3s; }
+.safe-mode-toggle input:checked + .slider { background-color: #2e7d32; }
+.safe-mode-toggle input:checked + .slider::before { transform: translateX(12px); }
+.safe-mode-toggle .label-text { color: #81c784; font-weight: bold; }
+.safe-mode-toggle input:not(:checked) ~ .label-text { color: #e57373; }
+
+.auto-limit-box {
+    display: flex;
+    align-items: center;
+    background: #252526;
+    border: 1px solid #3c3c3c;
+    border-radius: 4px;
+    padding: 2px 6px;
+    gap: 4px;
+    height: 26px;
+}
+.auto-limit-toggle { display: flex; align-items: center; gap: 4px; cursor: pointer; font-size: 11px; color: #4ec9b0; font-weight: bold; }
+.auto-limit-input { width: 55px; background: #1e1e1e; color: #61dafb; border: 1px solid #3c3c3c; border-radius: 3px; padding: 2px 4px; font-size: 11px; font-family: Consolas, monospace; font-weight: bold; text-align: center; outline: none; }
+
+/* Results Panel & Results Header */
+.results-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #252526;
+    border: 1px solid #3c3c3c;
+    border-radius: 4px;
+    overflow: hidden;
+}
+.results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #181818;
+    padding: 4px 10px;
+    border-bottom: 1px solid #3c3c3c;
+}
+.results-title { display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: bold; color: #61dafb; }
+.results-actions { display: flex; align-items: center; gap: 6px; }
+
+.query-stats { font-size: 11px; color: #ce9178; font-family: Consolas, monospace; background: #252526; padding: 2px 8px; border-radius: 3px; border: 1px solid #3c3c3c; display: none; }
+.filter-input { padding: 3px 8px; background: #1e1e1e; border: 1px solid #3c3c3c; color: #4ec9b0; border-radius: 4px; font-size: 11px; width: 140px; outline: none; }
+.schema-filter { width: 100%; margin-bottom: 6px; }
+
+.results-container { flex: 1; overflow: auto; padding: 0; }
+#placeholder-text { color: #666; text-align: center; margin-top: 50px; font-size: 13px; }
+
+table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 12px; }
+th, td { border-bottom: 1px solid #3c3c3c; border-right: 1px solid #3c3c3c; padding: 6px 10px; text-align: left; }
+th { background-color: #181818; color: #4ec9b0; position: sticky; top: 0; z-index: 10; box-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+tr:nth-child(even) { background-color: #2a2d2e; }
+.stt-col { text-align: center; font-weight: bold; color: #61dafb; width: 45px; }
+
+/* Status Bar Footer */
+.statusbar {
+    height: 22px;
+    background: #181818;
+    border-top: 1px solid #333;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    font-size: 11px;
+    color: #888;
+    font-family: Consolas, monospace;
+    margin-top: 4px;
+}
+.status-item { display: flex; align-items: center; gap: 6px; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.status-dot.connected { background: #4caf50; }
+.status-dot.disconnected { background: #f44336; }
+.status-divider { color: #444; margin: 0 4px; }
+.ml-auto { margin-left: auto; }
+
+/* Sidebar Tabs */
+.sidebar-tabs { display: flex; gap: 4px; flex: 1; }
+.sb-tab { flex: 1; background: #1e1e1e; color: #888; border: 1px solid #3c3c3c; padding: 4px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; }
+.sb-tab.active { background: #0e639c; color: #fff; border-color: #1177bb; }
+.sidebar-panel { flex: 1; height: 0; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+.history-list, .schema-tree-list { flex: 1; overflow-y: auto !important; display: block !important; padding-right: 4px; }
+
+/* Items */
+.history-item, .fav-item { background: #1e1e1e; padding: 6px 8px; margin-bottom: 4px; border-radius: 4px; border: 1px solid #333; cursor: pointer; font-size: 11px; font-family: Consolas, monospace; color: #d4d4d4; }
+.history-item:hover, .fav-item:hover { border-color: #61dafb; background: #2d2d2d; }
+.fav-item { border-color: #f57f17; }
+.fav-header { display: flex; justify-content: space-between; font-weight: bold; color: #fbc02d; margin-bottom: 2px; }
+.fav-del-btn:hover { color: #f88080; }
+
+/* Tabs Bar */
+.tab-bar-container { display: flex; align-items: center; background: #181818; padding: 3px 6px 0 6px; border-radius: 4px 4px 0 0; border: 1px solid #3c3c3c; border-bottom: none; gap: 4px; }
+.tab-bar { display: flex; gap: 4px; overflow-x: auto; flex: 1; }
+.tab-item { background: #2d2d2d; color: #888; padding: 4px 10px; border-radius: 4px 4px 0 0; cursor: pointer; font-size: 11px; display: flex; align-items: center; gap: 6px; border: 1px solid #3c3c3c; border-bottom: none; }
+.tab-item.active { background: #252526; color: #61dafb; font-weight: bold; border-bottom: 2px solid #61dafb; }
+.tab-close { font-size: 11px; color: #777; border-radius: 50%; width: 12px; height: 12px; display: flex; align-items: center; justify-content: center; }
+.tab-close:hover { background: #5a1d1d; color: #f88080; }
+.btn-add-tab { background: #252526; color: #61dafb; border: 1px solid #3c3c3c; width: 22px; height: 22px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px; }
+
+/* Modals & Messages */
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 1000; justify-content: center; align-items: center; }
+.modal-content { background: #252526; padding: 16px; border-radius: 6px; width: 400px; border: 1px solid #3c3c3c; color: #ccc; }
+.modal-header { display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid #3c3c3c; padding-bottom: 8px; color: #61dafb; }
+.form-group { margin-bottom: 10px; }
+.form-group label { display: block; margin-bottom: 4px; font-size: 11px; color: #aaa; }
+.form-group input { width: 100%; padding: 6px; background: #1e1e1e; border: 1px solid #3c3c3c; color: #fff; border-radius: 4px; }
+
+.msg-box { padding: 8px; border-radius: 4px; font-size: 12px; display: none; word-break: break-all; font-family: monospace; }
+.msg-box.error { background-color: #5a1d1d; color: #f88080; border: 1px solid #802020; display: block; }
+.msg-box.success { background-color: #1e4620; color: #80f880; border: 1px solid #208020; display: block; }
+
+
+/* Widget Phân trang liền khối chuẩn IDE */
+.pagination-widget {
+    display: inline-flex;
+    align-items: center;
+    background: #1e1e1e;
+    border: 1px solid #3c3c3c;
+    border-radius: 4px;
+    height: 26px;
+    padding: 0 2px;
+    user-select: none;
+    box-sizing: border-box;
+}
+
+/* Nút mũi tên chuyển trang */
+.pg-btn {
+    background: transparent;
+    color: #61dafb;
+    border: none;
+    width: 22px;
+    height: 20px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 15px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, color 0.15s;
+}
+
+.pg-btn:hover:not(:disabled) {
+    background: #04395e;
+    color: #ffffff;
+}
+
+.pg-btn:disabled {
+    color: #444444;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Nhãn hiển thị số trang */
+.pg-label {
+    font-size: 11px;
+    font-family: Consolas, monospace;
+    color: #9cdcfe;
+    padding: 0 8px;
+    font-weight: 600;
+    white-space: nowrap;
+    border-left: 1px solid #2d2d2d;
+    border-right: 1px solid #2d2d2d;
+}
+
+/* Nút Tải lại Schema chuẩn IDE Dark Theme */
+.btn-reload-schema {
+    background-color: #252526;
+    color: #4ec9b0;
+    border: 1px solid #3c3c3c;
+    padding: 5px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-reload-schema .icon {
+    font-size: 11px;
+    transition: transform 0.3s ease;
+}
+
+.btn-reload-schema:hover {
+    background-color: #333333;
+    border-color: #4ec9b0;
+    color: #73e6ce;
+    box-shadow: 0 2px 8px rgba(78, 201, 176, 0.15);
+}
+
+.btn-reload-schema:hover .icon {
+    transform: rotate(180deg);
+}
+
+.btn-reload-schema:active {
+    transform: scale(0.96);
+}
+
+/* Container gom nhóm các nút ở góc phải Navbar */
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Kiểu dáng nút Tải lại Schema hài hòa với nút Cấu hình */
+.btn-reload-schema {
+    background-color: #252526;
+    color: #4ec9b0;
+    border: 1px solid #3c3c3c;
+    padding: 5px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-reload-schema:hover {
+    background-color: #333333;
+    border-color: #4ec9b0;
+    color: #73e6ce;
+}
+
+.btn-reload-schema:active {
+    transform: scale(0.96);
+}
+/* dark/light mode toggle button */
+/* Nút chuyển đổi Theme */
+.btn-theme-toggle {
+    background-color: #252526;
+    color: #e5c07b;
+    border: 1px solid #3c3c3c;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s ease-in-out;
+}
+.btn-theme-toggle:hover {
+    background-color: #333333;
+    border-color: #e5c07b;
+}
+
+/* =========================================================================
+   LIGHT MODE OVERRIDES (GIAO DIỆN SÁNG)
+   ========================================================================= */
+body.light-mode {
+    background-color: #f4f5f7;
+    color: #172b4d;
+}
+
+/* Header Navbar & Statusbar */
+body.light-mode .navbar,
+body.light-mode .statusbar,
+body.light-mode .results-header,
+body.light-mode .toolbar {
+    background-color: #ffffff;
+    border-color: #dfe1e6;
+    color: #172b4d;
+}
+
+body.light-mode .navbar h1 { color: #0052cc; }
+body.light-mode .btn-config,
+body.light-mode .btn-reload-schema,
+body.light-mode .btn-theme-toggle {
+    background-color: #f4f5f7;
+    color: #172b4d;
+    border-color: #cccccc;
+}
+body.light-mode .btn-config:hover,
+body.light-mode .btn-reload-schema:hover,
+body.light-mode .btn-theme-toggle:hover {
+    background-color: #ebecf0;
+}
+
+/* Sidebar & Result Panels */
+body.light-mode .sidebar,
+body.light-mode .results-panel,
+body.light-mode .editor-container,
+body.light-mode .tab-bar-container {
+    background-color: #ffffff;
+    border-color: #dfe1e6;
+}
+
+body.light-mode .sb-tab {
+    background: #f4f5f7;
+    color: #5e6c84;
+    border-color: #dfe1e6;
+}
+body.light-mode .sb-tab.active {
+    background: #0052cc;
+    color: #ffffff;
+    border-color: #0052cc;
+}
+
+/* Tabs */
+body.light-mode .tab-item {
+    background: #ebecf0;
+    color: #5e6c84;
+    border-color: #dfe1e6;
+}
+body.light-mode .tab-item.active {
+    background: #ffffff;
+    color: #0052cc;
+    border-bottom-color: #0052cc;
+}
+
+/* Controls & Inputs */
+body.light-mode .safe-mode-toggle,
+body.light-mode .auto-limit-box {
+    background-color: #f4f5f7;
+    border-color: #dfe1e6;
+}
+body.light-mode .filter-input,
+body.light-mode .auto-limit-input {
+    background-color: #ffffff;
+    border-color: #cccccc;
+    color: #172b4d;
+}
+
+/* Table Results */
+body.light-mode table th {
+    background-color: #f4f5f7;
+    color: #0052cc;
+    border-color: #dfe1e6;
+}
+body.light-mode table td {
+    border-color: #dfe1e6;
+    color: #172b4d;
+}
+body.light-mode tr:nth-child(even) {
+    background-color: #fafbfc;
+}
+body.light-mode .stt-col {
+    color: #0052cc;
+}
+
+/* Sidebar Items & Modal */
+body.light-mode .history-item,
+body.light-mode .fav-item {
+    background-color: #f4f5f7;
+    border-color: #dfe1e6;
+    color: #172b4d;
+}
+body.light-mode .modal-content {
+    background-color: #ffffff;
+    border-color: #cccccc;
+    color: #172b4d;
+}
+body.light-mode .modal-content input {
+    background-color: #f4f5f7;
+    border-color: #cccccc;
+    color: #172b4d;
+}
+body.light-mode .pagination-widget {
+    background-color: #f4f5f7;
+    border-color: #cccccc;
+}
+body.light-mode .pg-label {
+    color: #0052cc;
+    border-color: #dfe1e6;
+}
+
+/* =========================================================================
+   FIND & REPLACE BAR (DATAGRIP STYLE)
+   ========================================================================= */
+.editor-container {
+    position: relative; /* Bắt buộc để thanh Search nổi lên trên Editor */
+}
+
+.search-replace-bar {
+    position: absolute;
+    top: 4px;
+    right: 12px;
+    z-index: 100;
+    background: #252526;
+    border: 1px solid #007acc;
+    border-radius: 6px;
+    padding: 6px 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+}
+
+.srb-row { display: flex; align-items: center; gap: 8px; }
+
+.srb-btn-toggle-replace {
+    background: transparent;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    font-size: 10px;
+    padding: 2px 4px;
+    border-radius: 3px;
+}
+.srb-btn-toggle-replace:hover { background: #3c3c3c; color: #fff; }
+
+.srb-input-wrapper {
+    display: flex;
+    align-items: center;
+    background: #1e1e1e;
+    border: 1px solid #3c3c3c;
+    border-radius: 4px;
+    padding: 2px 8px;
+    gap: 6px;
+}
+.srb-input-wrapper:focus-within { border-color: #007acc; }
+
+.srb-input-wrapper input {
+    background: transparent;
+    border: none;
+    color: #d4d4d4;
+    font-size: 12px;
+    outline: none;
+    width: 240px;
+    font-family: Consolas, monospace;
+}
+
+.srb-icon { font-size: 11px; opacity: 0.6; }
+
+.srb-options { display: flex; gap: 2px; }
+
+.srb-opt-btn {
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 2px 5px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-family: Consolas, monospace;
+}
+.srb-opt-btn:hover { color: #ccc; background: #333; }
+.srb-opt-btn.active { color: #fff; background: #0e639c; }
+
+.srb-count {
+    font-size: 11px;
+    color: #9cdcfe;
+    font-family: Consolas, monospace;
+    min-width: 75px;
+    text-align: center;
+}
+
+.srb-nav-btns, .srb-action-btns { display: flex; gap: 4px; }
+
+.srb-btn {
+    background: #333;
+    color: #ccc;
+    border: 1px solid #444;
+    border-radius: 3px;
+    padding: 2px 8px;
+    font-size: 11px;
+    cursor: pointer;
+}
+.srb-btn:hover { background: #04395e; color: #fff; border-color: #007acc; }
+
+.srb-close-btn {
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+}
+.srb-close-btn:hover { color: #f88080; }
+
+/* Highlight màu cho từ tìm thấy trong CodeMirror */
+.cm-search-highlight {
+    background: rgba(255, 200, 0, 0.25) !important;
+    border-bottom: 1px solid #ffca28;
+}
+.cm-search-highlight-active {
+    background: rgba(255, 110, 0, 0.65) !important;
+    outline: 1px solid #ff9800;
+}
+
+/* Override Light Mode */
+body.light-mode .search-replace-bar {
+    background: #ffffff;
+    border-color: #0052cc;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+body.light-mode .srb-input-wrapper { background: #f4f5f7; border-color: #cccccc; }
+body.light-mode .srb-input-wrapper input { color: #172b4d; }
+body.light-mode .srb-btn { background: #ebecf0; color: #172b4d; border-color: #cccccc; }
