@@ -27,6 +27,8 @@ function invokeTauri(command, args = {}) {
 let lastExecutedSql = ''; // Lưu câu SQL vừa thực thi thành công
 
 document.addEventListener('DOMContentLoaded', () => {
+    bindActionHandlers();
+
     // Khởi tạo CodeMirror IDE
     editor = CodeMirror.fromTextArea(document.getElementById('sqlEditor'), {
         mode: 'text/x-sql',
@@ -108,6 +110,67 @@ document.addEventListener('DOMContentLoaded', () => {
     initTheme();
     window.setTimeout(checkForAppUpdates, 3000);
 });
+
+function bindActionHandlers() {
+    const actions = {
+        toggleTheme: () => toggleTheme(),
+        reloadSchema: () => loadDynamicSchema(true),
+        openConfigModal: () => openConfigModal(),
+        addTab: () => addTab(),
+        toggleReplaceRow: () => toggleReplaceRow(),
+        toggleSearchOption: (element) => toggleSearchOption(element.dataset.option),
+        findPrev: () => findPrev(),
+        findNext: () => findNext(),
+        closeSearchBar: () => closeSearchBar(),
+        doReplace: () => doReplace(),
+        doReplaceAll: () => doReplaceAll(),
+        runQuery: (element) => runQuery(Number(element.dataset.page || 1)),
+        executeCommand: (element) => executeCommand(element.dataset.command),
+        formatSql: () => formatSql(),
+        saveCurrentQueryToFavorites: () => saveCurrentQueryToFavorites(),
+        toggleView: () => toggleView(),
+        exportExcel: () => exportExcel(),
+        changePage: (element) => changePage(Number(element.dataset.delta)),
+        switchSidebarTab: (element) => switchSidebarTab(element.dataset.tab),
+        toggleSidebar: () => toggleSidebar(),
+        closeConfigModal: () => closeConfigModal(),
+        saveConfig: () => saveConfig(),
+        toggleSafeMode: () => toggleSafeMode(),
+        insertTextToEditor: (element) => insertTextToEditor(element.dataset.value),
+        switchTab: (element) => switchTab(Number(element.dataset.tabId)),
+        closeTab: (element, event) => closeTab(Number(element.dataset.tabId), event),
+        deleteFavorite: (element, event) => deleteFavorite(Number(element.dataset.favoriteId), event),
+        performSearch: () => performSearch(),
+        renderResults: () => renderResults(),
+        filterSchemaTree: () => filterSchemaTree()
+    };
+
+    document.addEventListener('click', (event) => {
+        if (!(event.target instanceof Element)) return;
+        const element = event.target.closest('[data-action]');
+        if (!element || element.matches(':disabled')) return;
+        const action = actions[element.dataset.action];
+        if (action) action(element, event);
+    });
+
+    document.addEventListener('change', (event) => {
+        if (event.target instanceof Element && event.target.dataset.action === 'toggleSafeMode') {
+            actions.toggleSafeMode();
+        }
+    });
+
+    document.addEventListener('input', (event) => {
+        if (!(event.target instanceof Element)) return;
+        const action = actions[event.target.dataset.inputAction];
+        if (action) action(event.target, event);
+    });
+
+    document.addEventListener('dblclick', (event) => {
+        if (!(event.target instanceof Element)) return;
+        const cell = event.target.closest('[data-action="editCell"]');
+        if (cell) makeCellEditable(cell, Number(cell.dataset.rowIndex), cell.dataset.column);
+    });
+}
 
 async function checkForAppUpdates() {
     const hostname = window.location.hostname;
@@ -262,8 +325,7 @@ function renderSchemaTree(filterKeyword = '') {
                     <ul style="list-style: none; padding-left: 14px; margin: 2px 0;">
                         ${displayCols.map(col => `
                             <li style="color: #9cdcfe; cursor: pointer; padding: 1px 0;" 
-                                title="Click để chèn vào Editor" 
-                                onclick="insertTextToEditor('${col}')">
+                                title="Click để chèn vào Editor" data-action="insertTextToEditor" data-value="${escapeHtmlAttribute(col)}">
                                 🔹 ${col}
                             </li>
                         `).join('')}
@@ -291,6 +353,10 @@ function insertTextToEditor(text) {
         doc.replaceRange(text, cursor);
         window.editor.focus();
     }
+}
+
+function escapeHtmlAttribute(value) {
+    return String(value).replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 }
 
 function toggleSafeMode() {
@@ -353,9 +419,9 @@ function renderTabs() {
     if (!tabBar) return;
 
     tabBar.innerHTML = tabs.map(t => `
-        <div class="tab-item ${t.id === activeTabId ? 'active' : ''}" onclick="switchTab(${t.id})">
+        <div class="tab-item ${t.id === activeTabId ? 'active' : ''}" data-action="switchTab" data-tab-id="${t.id}">
             <span>${t.title}</span>
-            <span class="tab-close" onclick="closeTab(${t.id}, event)">&times;</span>
+            <span class="tab-close" data-action="closeTab" data-tab-id="${t.id}">&times;</span>
         </div>
     `).join('');
 }
@@ -772,7 +838,7 @@ function renderResults() {
             const val = row[col];
             const displayVal = val !== undefined && val !== null ? (typeof val === 'object' ? JSON.stringify(val) : val) : '';
             // Gán sự kiện nhấp đúp để chỉnh sửa trực tiếp
-            html += `<td title="Nhấp đúp chuột để chỉnh sửa giá trị này" ondblclick="makeCellEditable(this, ${idx}, '${col}')">${displayVal}</td>`;
+            html += `<td title="Nhấp đúp chuột để chỉnh sửa giá trị này" data-action="editCell" data-row-index="${idx}" data-column="${escapeHtmlAttribute(col)}">${displayVal}</td>`;
         });
         html += '</tr>';
     });
@@ -1102,7 +1168,7 @@ function renderFavorites() {
         item.innerHTML = `
             <div class="fav-header">
                 <span>⭐ ${fav.title}</span>
-                <span class="fav-del-btn" onclick="deleteFavorite(${fav.id}, event)" title="Xóa">&times;</span>
+            <span class="fav-del-btn" data-action="deleteFavorite" data-favorite-id="${fav.id}" title="Xóa">&times;</span>
             </div>
             <div class="fav-sql">${fav.sql}</div>
         `;

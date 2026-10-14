@@ -31,11 +31,11 @@
         
         <!-- Gom 2 nút vào thẻ nav-actions để đẩy sang góc phải -->
         <div class="nav-actions">
-            <button class="btn-theme-toggle" id="btnThemeToggle" onclick="toggleTheme()" title="Đổi giao diện Tối/Sáng">🌙 Tối</button>
-            <button class="btn-reload-schema" onclick="loadDynamicSchema(true)" title="Tải lại Schema từ CSDL">
+            <button class="btn-theme-toggle" id="btnThemeToggle" data-action="toggleTheme" title="Đổi giao diện Tối/Sáng">🌙 Tối</button>
+            <button class="btn-reload-schema" data-action="reloadSchema" title="Tải lại Schema từ CSDL">
                 🔄 Tải lại Schema
             </button>
-            <button class="btn-config" id="btn-config" onclick="openConfigModal()">
+            <button class="btn-config" id="btn-config" data-action="openConfigModal">
                 ⚙️ Cấu hình kết nối
             </button>
         </div>
@@ -47,7 +47,7 @@
             <!-- Multi-tab bar -->
             <div class="tab-bar-container">
                 <div class="tab-bar" id="tabBar"></div>
-                <button class="btn-add-tab" onclick="addTab()" title="Mở Tab Mới">+</button>
+                <button class="btn-add-tab" data-action="addTab" title="Mở Tab Mới">+</button>
             </div>
 
             <!-- SQL Editor Container -->
@@ -55,22 +55,22 @@
                 <!-- Thanh Find & Replace chuẩn DataGrip -->
                 <div id="searchReplaceBar" class="search-replace-bar" style="display: none;">
                     <div class="srb-row srb-search-row">
-                        <button class="srb-btn-toggle-replace" id="btnToggleReplace" onclick="toggleReplaceRow()" title="Hiện/Ẩn thanh Thay thế (Replace)">▼</button>
+                        <button class="srb-btn-toggle-replace" id="btnToggleReplace" data-action="toggleReplaceRow" title="Hiện/Ẩn thanh Thay thế (Replace)">▼</button>
                         <div class="srb-input-wrapper">
                             <span class="srb-icon">🔍</span>
-                            <input type="text" id="findInput" placeholder="Search" oninput="performSearch()" />
+                            <input type="text" id="findInput" data-input-action="performSearch" placeholder="Search" />
                             <div class="srb-options">
-                                <button class="srb-opt-btn" id="optMatchCase" onclick="toggleSearchOption('case')" title="Match Case (Cc)">Cc</button>
-                                <button class="srb-opt-btn" id="optWholeWord" onclick="toggleSearchOption('word')" title="Words (W)">W</button>
-                                <button class="srb-opt-btn" id="optRegex" onclick="toggleSearchOption('regex')" title="Regex (.*)">.*</button>
+                                <button class="srb-opt-btn" id="optMatchCase" data-action="toggleSearchOption" data-option="case" title="Match Case (Cc)">Cc</button>
+                                <button class="srb-opt-btn" id="optWholeWord" data-action="toggleSearchOption" data-option="word" title="Words (W)">W</button>
+                                <button class="srb-opt-btn" id="optRegex" data-action="toggleSearchOption" data-option="regex" title="Regex (.*)">.*</button>
                             </div>
                         </div>
                         <span class="srb-count" id="searchCount">0 results</span>
                         <div class="srb-nav-btns">
-                            <button class="srb-btn" onclick="findPrev()" title="Kết quả trước (Shift+Enter)">↑</button>
-                            <button class="srb-btn" onclick="findNext()" title="Kết quả tiếp (Enter)">↓</button>
+                            <button class="srb-btn" data-action="findPrev" title="Kết quả trước (Shift+Enter)">↑</button>
+                            <button class="srb-btn" data-action="findNext" title="Kết quả tiếp (Enter)">↓</button>
                         </div>
-                        <button class="srb-close-btn" onclick="closeSearchBar()" title="Đóng (Esc)">&times;</button>
+                        <button class="srb-close-btn" data-action="closeSearchBar" title="Đóng (Esc)">&times;</button>
                     </div>
                     <div class="srb-row srb-replace-row" id="replaceRow" style="display: none;">
                         <div class="srb-input-wrapper">
@@ -78,8 +78,8 @@
                             <input type="text" id="replaceInput" placeholder="Replace" />
                         </div>
                         <div class="srb-action-btns">
-                            <button class="srb-btn srb-btn-action" onclick="doReplace()">Replace</button>
-                            <button class="srb-btn srb-btn-action" onclick="doReplaceAll()">Replace All</button>
+                            <button class="srb-btn srb-btn-action" data-action="doReplace">Replace</button>
+                            <button class="srb-btn srb-btn-action" data-action="doReplaceAll">Replace All</button>
                         </div>
                     </div>
                 </div>
@@ -90,23 +90,23 @@
             <!-- SQL Execution Toolbar -->
             <div class="toolbar">
                 <div class="toolbar-group">
-                    <button class="btn btn-run" id="btn-execute" onclick="runQuery(1)" title="Thực thi SQL (Ctrl+Enter)">▶ Chạy</button>
-                    <button class="btn btn-commit" id="btn-commit" onclick="executeCommand('COMMIT')" title="Commit giao dịch">Commit</button>
-                    <button class="btn btn-rollback" id="btn-rollback" onclick="executeCommand('ROLLBACK')" title="Rollback giao dịch">Rollback</button>
+                    <button class="btn btn-run" id="btn-execute" data-action="runQuery" data-page="1" title="Thực thi SQL (Ctrl+Enter)">▶ Chạy</button>
+                    <button class="btn btn-commit" id="btn-commit" data-action="executeCommand" data-command="COMMIT" title="Commit giao dịch">Commit</button>
+                    <button class="btn btn-rollback" id="btn-rollback" data-action="executeCommand" data-command="ROLLBACK" title="Rollback giao dịch">Rollback</button>
                 </div>
 
                 <div class="toolbar-divider"></div>
 
                 <div class="toolbar-group">
-                    <button class="btn btn-format" id="btn-format" onclick="formatSql()" title="Định dạng SQL chuẩn">🧹 Format</button>
-                    <button class="btn btn-fav" id="btn-fav" onclick="saveCurrentQueryToFavorites()" title="Lưu Query yêu thích">⭐ Lưu</button>
+                    <button class="btn btn-format" id="btn-format" data-action="formatSql" title="Định dạng SQL chuẩn">🧹 Format</button>
+                    <button class="btn btn-fav" id="btn-fav" data-action="saveCurrentQueryToFavorites" title="Lưu Query yêu thích">⭐ Lưu</button>
                 </div>
 
                 <div class="toolbar-divider"></div>
 
                 <div class="toolbar-group">
                     <label class="safe-mode-toggle" title="Chặn lệnh DML (UPDATE/DELETE)">
-                        <input type="checkbox" id="safeModeCheck" onchange="toggleSafeMode()" checked>
+                        <input type="checkbox" id="safeModeCheck" data-action="toggleSafeMode" checked>
                         <span class="slider"></span>
                         <span class="label-text">🛡️ Safe Mode</span>
                     </label>
@@ -132,17 +132,17 @@
                     </div>
                     
                     <div class="results-actions">
-                        <button class="btn btn-toggle" id="btn-toggle-view" onclick="toggleView()" title="Đổi giao diện Bảng/JSON">👁️ View</button>
-                        <button class="btn btn-excel" id="btn-export" onclick="exportExcel()" title="Xuất tập tin Excel">📥 Excel</button>
+                        <button class="btn btn-toggle" id="btn-toggle-view" data-action="toggleView" title="Đổi giao diện Bảng/JSON">👁️ View</button>
+                        <button class="btn btn-excel" id="btn-export" data-action="exportExcel" title="Xuất tập tin Excel">📥 Excel</button>
                         
                         <div class="toolbar-divider"></div>
                         
-                        <input type="text" id="filterInput" class="filter-input" placeholder="🔍 Lọc kết quả..." oninput="renderResults()" />
+                        <input type="text" id="filterInput" class="filter-input" data-input-action="renderResults" placeholder="🔍 Lọc kết quả..." />
                         
                         <div class="pagination-widget">
-                            <button class="pg-btn" id="btnPrev" onclick="changePage(-1)" disabled title="Trang trước">‹</button>
+                            <button class="pg-btn" id="btnPrev" data-action="changePage" data-delta="-1" disabled title="Trang trước">‹</button>
                             <span class="pg-label" id="pageLabel">Trang 1</span>
-                            <button class="pg-btn" id="btnNext" onclick="changePage(1)" disabled title="Trang sau">›</button>
+                            <button class="pg-btn" id="btnNext" data-action="changePage" data-delta="1" disabled title="Trang sau">›</button>
                         </div>
                     </div>
                 </div>
@@ -157,16 +157,16 @@
         <div class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="sidebar-tabs">
-                    <button class="sb-tab active" id="sbTabSchema" onclick="switchSidebarTab('SCHEMA')" title="CSDL Schema">🗄️ <span class="tab-label">CSDL</span></button>
-                    <button class="sb-tab" id="sbTabHistory" onclick="switchSidebarTab('HISTORY')" title="Lịch sử Query">📜 <span class="tab-label">Lịch sử</span></button>
-                    <button class="sb-tab" id="sbTabFav" onclick="switchSidebarTab('FAV')" title="Yêu thích">⭐ <span class="tab-label">Yêu thích</span></button>
+                    <button class="sb-tab active" id="sbTabSchema" data-action="switchSidebarTab" data-tab="SCHEMA" title="CSDL Schema">🗄️ <span class="tab-label">CSDL</span></button>
+                    <button class="sb-tab" id="sbTabHistory" data-action="switchSidebarTab" data-tab="HISTORY" title="Lịch sử Query">📜 <span class="tab-label">Lịch sử</span></button>
+                    <button class="sb-tab" id="sbTabFav" data-action="switchSidebarTab" data-tab="FAV" title="Yêu thích">⭐ <span class="tab-label">Yêu thích</span></button>
                 </div>
-                <button class="btn-toggle-sidebar" id="btnToggleSidebar" onclick="toggleSidebar()" title="Thu gọn / Mở rộng Sidebar">◄</button>
+                <button class="btn-toggle-sidebar" id="btnToggleSidebar" data-action="toggleSidebar" title="Thu gọn / Mở rộng Sidebar">◄</button>
             </div>
              
             <!-- Panel 1: Schema Browser -->
             <div id="panelSchema" class="sidebar-panel">
-                <input type="text" id="schemaSearchInput" class="filter-input schema-filter" placeholder="🔍 Tìm bảng/cột Maximo..." oninput="filterSchemaTree()" />
+                <input type="text" id="schemaSearchInput" class="filter-input schema-filter" data-input-action="filterSchemaTree" placeholder="🔍 Tìm bảng/cột Maximo..." />
                 <div id="schemaTreeList" class="schema-tree-list"></div>
             </div>
 
@@ -202,7 +202,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Cấu hình kết nối Maximo</h3>
-                <span class="close-btn" onclick="closeConfigModal()">&times;</span>
+                <span class="close-btn" data-action="closeConfigModal">&times;</span>
             </div>
             <div class="form-group">
                 <label>Maximo Host (bao gồm Port):</label>
@@ -220,7 +220,7 @@
                 <label>Password:</label>
                 <input type="password" id="cfgPass" placeholder="Nhập password" />
             </div>
-            <button class="btn btn-run" style="width: 100%; margin-top: 10px;" onclick="saveConfig()">Lưu cấu hình</button>
+            <button class="btn btn-run" style="width: 100%; margin-top: 10px;" data-action="saveConfig">Lưu cấu hình</button>
         </div>
     </div>
 
