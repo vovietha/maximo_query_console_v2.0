@@ -2,6 +2,7 @@ import { state } from './state.js';
 import { addTab } from './tabs.js';
 import { getCurrentStatementAtCursor } from './query.js';
 import { escapeHtml, escapeHtmlAttribute } from './utils.js';
+import { getActiveConnection } from './connections.js';
 
 export function renderResults() {
     const resContainer = document.getElementById('resultsContainer');
@@ -179,7 +180,7 @@ export async function exportExcel() {
         { "Thông số": "Thời gian xuất", "Nội dung": new Date().toLocaleString('vi-VN') },
         { "Thông số": "Trang hiện tại", "Nội dung": state.currentPage },
         { "Thông số": "Số bản ghi xuất", "Nội dung": dataToExport.length },
-        { "Thông số": "Môi trường Host", "Nội dung": localStorage.getItem('maximo_host') || 'N/A' },
+        { "Thông số": "Môi trường Host", "Nội dung": getActiveConnection()?.host || 'N/A' },
         { "Thông số": "Câu lệnh SQL", "Nội dung": sqlText }
     ];
 

@@ -13,25 +13,30 @@ const CREDENTIAL_SERVICE: &str = "com.maximo.sqlconsole";
 const CREDENTIAL_ACCOUNT: &str = "maximo-connection";
 
 #[cfg(windows)]
-fn credential_entry() -> Result<Entry, String> {
-    Entry::new(CREDENTIAL_SERVICE, CREDENTIAL_ACCOUNT).map_err(|e| e.to_string())
+fn credential_entry(profile_id: &str) -> Result<Entry, String> {
+    let account = if profile_id == "default" {
+        CREDENTIAL_ACCOUNT.to_owned()
+    } else {
+        format!("{CREDENTIAL_ACCOUNT}-{profile_id}")
+    };
+    Entry::new(CREDENTIAL_SERVICE, &account).map_err(|e| e.to_string())
 }
 
 #[cfg(not(windows))]
-fn credential_entry() -> Result<(), String> {
+fn credential_entry(_profile_id: &str) -> Result<(), String> {
     Err("Lưu mật khẩu an toàn hiện chỉ hỗ trợ Windows Credential Manager.".into())
 }
 
-fn load_password() -> Result<String, String> {
+fn load_password(profile_id: &str) -> Result<String, String> {
     #[cfg(windows)]
     {
-        return credential_entry()?
+        return credential_entry(profile_id)?
             .get_password()
-            .map_err(|_| "Chưa có mật khẩu Maximo trong Windows Credential Manager. Hãy mở Cấu hình kết nối và lưu lại mật khẩu.".to_string());
+            .map_err(|_| "Chưa có mật khẩu cho cấu hình kết nối này trong Windows Credential Manager.".to_string());
     }
     #[cfg(not(windows))]
     {
-        credential_entry()?;
+        credential_entry(profile_id)?;
         unreachable!()
     }
 }
@@ -54,30 +59,34 @@ struct ConnectionConfig {
     host: String,
     context: String,
     username: String,
+    #[serde(default = "default_profile_id")]
+    profile_id: String,
 }
 
+fn default_profile_id() -> String { "default".into() }
+
 #[tauri::command]
-fn save_connection_password(password: String) -> Result<(), String> {
+fn save_connection_password(profile_id: String, password: String) -> Result<(), String> {
     #[cfg(windows)]
     {
         if password.is_empty() {
             return Err("Mật khẩu không được để trống.".into());
         }
-        return credential_entry()?.set_password(&password).map_err(|e| e.to_string());
+        return credential_entry(&profile_id)?.set_password(&password).map_err(|e| e.to_string());
     }
     #[cfg(not(windows))]
     {
         let _ = password;
-        credential_entry()?;
+        credential_entry(&profile_id)?;
         unreachable!()
     }
 }
 
 #[tauri::command]
-fn has_connection_password() -> Result<bool, String> {
+fn has_connection_password(profile_id: String) -> Result<bool, String> {
     #[cfg(windows)]
     {
-        return match credential_entry()?.get_password() {
+        return match credential_entry(&profile_id)?.get_password() {
             Ok(_) => Ok(true),
             Err(keyring::Error::NoEntry) => Ok(false),
             Err(error) => Err(error.to_string()),
@@ -85,23 +94,23 @@ fn has_connection_password() -> Result<bool, String> {
     }
     #[cfg(not(windows))]
     {
-        credential_entry()?;
+        credential_entry(&profile_id)?;
         unreachable!()
     }
 }
 
 #[tauri::command]
-fn delete_connection_password() -> Result<(), String> {
+fn delete_connection_password(profile_id: String) -> Result<(), String> {
     #[cfg(windows)]
     {
-        return match credential_entry()?.delete_credential() {
+        return match credential_entry(&profile_id)?.delete_credential() {
             Ok(()) | Err(keyring::Error::NoEntry) => Ok(()),
             Err(error) => Err(error.to_string()),
         };
     }
     #[cfg(not(windows))]
     {
-        credential_entry()?;
+        credential_entry(&profile_id)?;
         unreachable!()
     }
 }
@@ -228,7 +237,7 @@ fn is_read_only_query(sql: &str) -> bool {
 
 async fn post_sql(config: &ConnectionConfig, sql: &str) -> Result<Value, String> {
     let url = endpoint(config)?;
-    let password = load_password()?;
+    let password = load_password(&config.profile_id)?;
     let auth = STANDARD.encode(format!("{}:{password}", config.username));
     let response = http_client()?
         .post(url)

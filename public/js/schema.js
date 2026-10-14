@@ -1,6 +1,7 @@
 import { state } from './state.js';
 import { invokeTauri } from './tauri.js';
 import { escapeHtml, escapeHtmlAttribute } from './utils.js';
+import { getActiveConnection } from './connections.js';
 
 export async function loadDynamicSchema(forceRefresh = false) {
     const treeContainer = document.getElementById('schemaTreeList');
@@ -23,10 +24,8 @@ export async function loadDynamicSchema(forceRefresh = false) {
     }
 
     try {
-        const host = localStorage.getItem('maximo_host');
-        const context = localStorage.getItem('maximo_context') || 'maximo';
-        const user = localStorage.getItem('maximo_user');
-        if (!host || !user) {
+        const config = getActiveConnection();
+        if (!config) {
             treeContainer.innerHTML = '<div style="color: #888; padding: 10px; font-size: 11px;">Bấm "Cấu hình kết nối" để tải Schema.</div>';
             return;
         }
@@ -34,7 +33,7 @@ export async function loadDynamicSchema(forceRefresh = false) {
         treeContainer.innerHTML = '<div style="color: #61dafb; padding: 10px; font-size: 12px;">⏳ Đang tải CSDL từ Maximo...</div>';
 
         const result = await invokeTauri('get_schema', {
-            config: { host, context, username: user }
+            config
         });
 
         if (result.success && result.schema) {

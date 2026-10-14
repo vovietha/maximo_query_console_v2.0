@@ -4,7 +4,8 @@ import { initTheme, toggleTheme } from './js/theme.js';
 import { loadDynamicSchema, filterSchemaTree, insertTextToEditor } from './js/schema.js';
 import { toggleSafeMode, addTab, switchTab, closeTab } from './js/tabs.js';
 import { formatSql } from './js/editor.js';
-import { openConfigModal, closeConfigModal, saveConfig } from './js/connection.js';
+import { openConfigModal, closeConfigModal, saveConfig, selectConnectionProfile, newConnectionProfile, deleteConnectionProfile } from './js/connection.js';
+import { initializeConnections } from './js/connections.js';
 import { changePage, runQuery, executeCommand } from './js/query.js';
 import { renderResults, makeCellEditable, toggleView, exportExcel } from './js/results.js';
 import { switchSidebarTab, loadHistory, saveCurrentQueryToFavorites, deleteFavorite, loadFavorites, toggleSidebar, updateStatusBar } from './js/sidebar.js';
@@ -45,6 +46,7 @@ async function loadCodeMirrorAssets() {
 
 function startApp() {
     bindActionHandlers();
+    initializeConnections();
 
     // Khởi tạo CodeMirror IDE
     state.editor = CodeMirror.fromTextArea(document.getElementById('sqlEditor'), {
@@ -152,6 +154,9 @@ function bindActionHandlers() {
         toggleSidebar: () => toggleSidebar(),
         closeConfigModal: () => closeConfigModal(),
         saveConfig: () => saveConfig(),
+        selectConnectionProfile: (element) => selectConnectionProfile(element.value),
+        newConnectionProfile: () => newConnectionProfile(),
+        deleteConnectionProfile: () => deleteConnectionProfile(),
         toggleSafeMode: () => toggleSafeMode(),
         insertTextToEditor: (element) => insertTextToEditor(element.dataset.value),
         switchTab: (element) => switchTab(Number(element.dataset.tabId)),
@@ -171,9 +176,9 @@ function bindActionHandlers() {
     });
 
     document.addEventListener('change', (event) => {
-        if (event.target instanceof Element && event.target.dataset.action === 'toggleSafeMode') {
-            actions.toggleSafeMode();
-        }
+        if (!(event.target instanceof Element)) return;
+        const action = actions[event.target.dataset.changeAction];
+        if (action) action(event.target, event);
     });
 
     document.addEventListener('input', (event) => {

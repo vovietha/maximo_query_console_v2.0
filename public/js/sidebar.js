@@ -1,5 +1,6 @@
 import { state } from './state.js';
 import { escapeHtml } from './utils.js';
+import { getActiveConnection } from './connections.js';
 
 export function switchSidebarTab(tabName) {
     const sidebar = document.getElementById('sidebar');
@@ -176,8 +177,11 @@ export function toggleSidebar() {
 // Hàm cập nhật Thanh Trạng Thái (Status Bar Footer)
 
 export function updateStatusBar() {
-    const host = localStorage.getItem('maximo_host');
-    const context = localStorage.getItem('maximo_context') || 'maximo';
+    const connection = getActiveConnection();
+    const host = connection?.host;
+    const context = connection?.context || 'maximo';
+    const configButton = document.getElementById('btn-config');
+    if (configButton) configButton.textContent = connection ? `⚙️ ${connection.name}` : '⚙️ Cấu hình kết nối';
 
     const limitCheck = document.getElementById('autoLimitCheck');
     const limitInput = document.getElementById('autoLimitValue');

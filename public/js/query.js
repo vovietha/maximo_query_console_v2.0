@@ -4,6 +4,7 @@ import { openConfigModal } from './connection.js';
 import { renderResults } from './results.js';
 import { addHistory } from './sidebar.js';
 import { isReadOnlyQuery } from './utils.js';
+import { getActiveConnection } from './connections.js';
 
 export function changePage(delta) {
     const targetPage = state.currentPage + delta;
@@ -169,10 +170,8 @@ export async function runQuery(page = 1) {
         sql = applyAutoLimit(sql, autoLimitVal);
     }
 
-    const host = localStorage.getItem('maximo_host');
-    const context = localStorage.getItem('maximo_context') || 'maximo';
-    const user = localStorage.getItem('maximo_user');
-    if (!host || !user) {
+    const config = getActiveConnection();
+    if (!config) {
         openConfigModal();
         return;
     }
@@ -183,7 +182,7 @@ export async function runQuery(page = 1) {
 
     try {
         const result = await invokeTauri('execute_sql', {
-            config: { host, context, username: user },
+            config,
             sql,
             page: state.currentPage,
             safeMode: isSafeMode
@@ -234,17 +233,15 @@ export async function executeCommand(cmd) {
     msgBox.className = 'msg-box';
     msgBox.style.display = 'none';
 
-    const host = localStorage.getItem('maximo_host');
-    const context = localStorage.getItem('maximo_context') || 'maximo';
-    const user = localStorage.getItem('maximo_user');
-    if (!host || !user) {
+    const config = getActiveConnection();
+    if (!config) {
         openConfigModal();
         return;
     }
 
     try {
         const result = await invokeTauri('execute_sql', {
-            config: { host, context, username: user },
+            config,
             sql: cmd,
             page: 1,
             safeMode: false

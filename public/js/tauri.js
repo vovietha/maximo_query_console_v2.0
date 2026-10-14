@@ -1,5 +1,3 @@
-import { state } from './state.js';
-
 export function invokeTauri(command, args = {}) {
     const api = window.__TAURI__?.core;
     if (typeof api?.invoke !== 'function') {
@@ -44,7 +42,7 @@ export async function migrateLegacyPassword() {
     const legacyPassword = localStorage.getItem('maximo_pass');
     if (!legacyPassword) return;
     try {
-        await invokeTauri('save_connection_password', { password: legacyPassword });
+        await invokeTauri('save_connection_password', { profileId: 'default', password: legacyPassword });
         localStorage.removeItem('maximo_pass');
     } catch (error) {
         console.error('Could not migrate the saved Maximo password:', error);

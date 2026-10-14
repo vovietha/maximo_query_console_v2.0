@@ -192,6 +192,18 @@
                 <span class="close-btn" data-action="closeConfigModal">&times;</span>
             </div>
             <div class="form-group">
+                <label>Danh sách cấu hình:</label>
+                <div class="connection-profile-row">
+                    <select id="cfgProfileSelect" data-change-action="selectConnectionProfile"></select>
+                    <button class="btn" type="button" data-action="newConnectionProfile">+ Mới</button>
+                    <button class="btn btn-rollback" id="btnDeleteConnection" type="button" data-action="deleteConnectionProfile">Xóa</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Tên cấu hình:</label>
+                <input type="text" id="cfgName" placeholder="VD: Maximo sản xuất" />
+            </div>
+            <div class="form-group">
                 <label>Maximo Host (bao gồm Port):</label>
                 <input type="text" id="cfgHost" placeholder="VD: http://cmms.pvpgb.vn:9080" />
             </div>
@@ -207,7 +219,7 @@
                 <label>Password:</label>
                 <input type="password" id="cfgPass" placeholder="Nhập password" />
             </div>
-            <button class="btn btn-run" style="width: 100%; margin-top: 10px;" data-action="saveConfig">Lưu cấu hình</button>
+            <button class="btn btn-run" style="width: 100%; margin-top: 10px;" data-action="saveConfig">Lưu và kết nối</button>
         </div>
     </div>
     <script type="module" src="./app.js"></script>
