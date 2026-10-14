@@ -63,6 +63,6 @@ writeFileSync(cargoLockPath, cargoLock);
 
 git('add', '-A');
 git('commit', '-m', `release: v${next}`);
-git('tag', `v${next}`);
+git('tag', '-a', `v${next}`, '-m', `Release v${next}`);
 git('push', 'origin', 'main', '--follow-tags');
 console.log(`Đã đẩy v${next}. GitHub Actions sẽ build installer và tạo GitHub Release.`);
