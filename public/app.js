@@ -10,6 +10,7 @@ import { changePage, runQuery, executeCommand } from './js/query.js';
 import { renderResults, makeCellEditable, toggleView, exportExcel } from './js/results.js';
 import { switchSidebarTab, loadHistory, saveCurrentQueryToFavorites, deleteFavorite, loadFavorites, toggleSidebar, updateStatusBar } from './js/sidebar.js';
 import { showSearchBar, closeSearchBar, toggleReplaceRow, toggleSearchOption, performSearch, findNext, findPrev, doReplace, doReplaceAll } from './js/search.js';
+import { closeParamModal, submitParams, onParamTypeChange } from './js/params.js';
 
 const codeMirrorScripts = [
     './vendor/codemirror/lib/codemirror.js',
@@ -164,8 +165,29 @@ function bindActionHandlers() {
         deleteFavorite: (element, event) => deleteFavorite(Number(element.dataset.favoriteId), event),
         performSearch: () => performSearch(),
         renderResults: () => renderResults(),
-        filterSchemaTree: () => filterSchemaTree()
+        filterSchemaTree: () => filterSchemaTree(),
+        closeParamModal: () => closeParamModal(),
+        submitParams: () => submitParams(),
+        onParamTypeChange: (element) => onParamTypeChange(element)
     };
+
+    const paramForm = document.getElementById('paramForm');
+    if (paramForm) {
+        paramForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            submitParams();
+        });
+    }
+
+    document.addEventListener('keydown', (event) => {
+        const paramModal = document.getElementById('paramModal');
+        if (paramModal && paramModal.style.display === 'flex') {
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                closeParamModal();
+            }
+        }
+    });
 
     document.addEventListener('click', (event) => {
         if (!(event.target instanceof Element)) return;

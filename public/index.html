@@ -222,6 +222,24 @@
             <button class="btn btn-run" style="width: 100%; margin-top: 10px;" data-action="saveConfig">Lưu và kết nối</button>
         </div>
     </div>
+
+    <!-- Popup Modal Tham số truy vấn (Parameters - DataGrip style) -->
+    <div id="paramModal" class="modal-overlay">
+        <div class="modal-content param-modal-content">
+            <div class="modal-header">
+                <h3>⚡ Tham số truy vấn (Parameters)</h3>
+                <span class="close-btn" data-action="closeParamModal">&times;</span>
+            </div>
+            <p class="modal-subtitle">Nhập giá trị cho các tham số được phát hiện trong câu truy vấn:</p>
+            <form id="paramForm">
+                <div id="paramListContainer" class="param-list-container"></div>
+                <div class="param-modal-actions">
+                    <button class="btn" type="button" data-action="closeParamModal">Hủy (Esc)</button>
+                    <button class="btn btn-run" type="submit" data-action="submitParams">▶ Thực thi (Enter)</button>
+                </div>
+            </form>
+        </div>
+    </div>
     <script type="module" src="./app.js"></script>
 </body>
 </html>

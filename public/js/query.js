@@ -5,6 +5,7 @@ import { renderResults } from './results.js';
 import { addHistory } from './sidebar.js';
 import { isReadOnlyQuery } from './utils.js';
 import { getActiveConnection } from './connections.js';
+import { extractSqlParameters, promptQueryParameters } from './params.js';
 
 export function changePage(delta) {
     const targetPage = state.currentPage + delta;
@@ -151,6 +152,27 @@ export async function runQuery(page = 1) {
         msgBox.style.display = 'block';
         msgBox.innerText = '⚠️ Không tìm thấy câu lệnh SQL hợp lệ tại vị trí con trỏ!';
         return;
+    }
+
+    // 1.1 Xử lý tham số truy vấn (:param_name kiểu DataGrip)
+    if (page === 1) {
+        const paramNames = extractSqlParameters(sql);
+        if (paramNames.length > 0) {
+            const promptResult = await promptQueryParameters(sql, paramNames);
+            if (!promptResult) {
+                // Người dùng đóng/hủy modal nhập tham số
+                return;
+            }
+            sql = promptResult.resolvedSql;
+            state.lastParameterizedQuery = { rawSql, sql, paramValues: promptResult.paramValues };
+        } else {
+            state.lastParameterizedQuery = null;
+        }
+    } else {
+        // Đang chuyển trang (page > 1): tái sử dụng SQL đã thay thế tham số nếu query gốc không đổi
+        if (state.lastParameterizedQuery && state.lastParameterizedQuery.rawSql === rawSql) {
+            sql = state.lastParameterizedQuery.sql;
+        }
     }
 
     const isSafeMode = document.getElementById('safeModeCheck')?.checked ?? true;

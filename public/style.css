@@ -688,3 +688,144 @@ body.light-mode .search-replace-bar {
 body.light-mode .srb-input-wrapper { background: #f4f5f7; border-color: #cccccc; }
 body.light-mode .srb-input-wrapper input { color: #172b4d; }
 body.light-mode .srb-btn { background: #ebecf0; color: #172b4d; border-color: #cccccc; }
+
+/* =========================================================================
+   QUERY PARAMETERS MODAL (DATAGRIP STYLE)
+   ========================================================================= */
+.param-modal-content {
+    width: 580px;
+    max-width: calc(100vw - 32px);
+}
+.param-modal-content .modal-subtitle {
+    margin: -4px 0 12px 0;
+    font-size: 12px;
+    color: #999;
+}
+.param-list-container {
+    max-height: 340px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 14px;
+    padding-right: 4px;
+}
+.param-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    background: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 4px;
+    padding: 6px 10px;
+}
+.param-label-col {
+    min-width: 120px;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.param-badge {
+    display: inline-block;
+    background: rgba(97, 218, 251, 0.12);
+    color: #61dafb;
+    border: 1px solid rgba(97, 218, 251, 0.3);
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 12px;
+    font-weight: 600;
+}
+.param-type-col {
+    width: 140px;
+    flex-shrink: 0;
+}
+.param-type-select {
+    width: 100%;
+    height: 28px;
+    background: #252526;
+    color: #ccc;
+    border: 1px solid #3c3c3c;
+    border-radius: 4px;
+    font-size: 12px;
+    padding: 2px 6px;
+    outline: none;
+    cursor: pointer;
+}
+.param-type-select:focus {
+    border-color: #61dafb;
+}
+.param-val-col {
+    flex: 1;
+}
+.param-value-input {
+    width: 100%;
+    height: 28px;
+    background: #181818;
+    color: #fff;
+    border: 1px solid #3c3c3c;
+    border-radius: 4px;
+    font-size: 12px;
+    padding: 4px 8px;
+    box-sizing: border-box;
+    font-family: 'Consolas', 'Courier New', monospace;
+    outline: none;
+}
+.param-value-input:focus {
+    border-color: #61dafb;
+    box-shadow: 0 0 0 1px rgba(97, 218, 251, 0.3);
+}
+.param-value-input:disabled {
+    background: #2a2a2a;
+    color: #777;
+    cursor: not-allowed;
+    border-color: #333;
+}
+.param-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding-top: 12px;
+    border-top: 1px solid #333;
+}
+
+/* Light mode overrides for Parameter Modal */
+body.light-mode .param-modal-content .modal-subtitle {
+    color: #5e6c84;
+}
+body.light-mode .param-row {
+    background: #f8f9fa;
+    border-color: #dfe1e6;
+}
+body.light-mode .param-badge {
+    background: rgba(0, 82, 204, 0.08);
+    color: #0052cc;
+    border-color: rgba(0, 82, 204, 0.25);
+}
+body.light-mode .param-type-select {
+    background: #ffffff;
+    color: #172b4d;
+    border-color: #cccccc;
+}
+body.light-mode .param-type-select:focus {
+    border-color: #0052cc;
+}
+body.light-mode .param-value-input {
+    background: #ffffff;
+    color: #172b4d;
+    border-color: #cccccc;
+}
+body.light-mode .param-value-input:focus {
+    border-color: #0052cc;
+    box-shadow: 0 0 0 1px rgba(0, 82, 204, 0.3);
+}
+body.light-mode .param-value-input:disabled {
+    background: #ebecf0;
+    color: #8993a4;
+    border-color: #dfe1e6;
+}
+body.light-mode .param-modal-actions {
+    border-top-color: #dfe1e6;
+}
+
